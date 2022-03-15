@@ -141,6 +141,7 @@ print("Write number of players")
 number_players = int(input())
 number_items_in_dict = number_players
 list_of_players = dict()
+
 while number_players > 0:
 
     # введем имя игрока
@@ -157,6 +158,7 @@ while number_players > 0:
 
     # обработка событий
     while not finished:
+
         clock.tick(FPS)
 
         # заполняем экран мишенями
