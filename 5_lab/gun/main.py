@@ -30,20 +30,8 @@ SIX_TO_ZERO = [54, 55, 56, 57, 48]
 
 TEAM_COLORS = [VIOLET, ORANGE]
 
-WIDTH = 1500
+WIDTH = 1300
 HEIGHT = 750
-
-
-def make_fon():
-    """
-    создаем поле игры
-    """
-    our_screen.fill(GREEN)
-    dr.rect(our_screen, WHITE, (150, 75, WIDTH - 300, HEIGHT - 150))
-    dr.rect(our_screen, BLUE, (10, HEIGHT - 10, WIDTH - 20, 10))
-    dr.rect(our_screen, YELLOW, (10, 0, WIDTH - 20, 10))
-    dr.rect(our_screen, MAGENTA, (WIDTH - 10, 10, 10, HEIGHT - 20))
-    dr.rect(our_screen, CYAN, (0, 10, 10, HEIGHT - 20))
 
 
 def score(screen, points):
@@ -61,9 +49,9 @@ def score(screen, points):
     screen.blit(score_counter2, score_place2)
 
 
-class Object:
+class Collidable:
     def __init__(self, screen: pygame.Surface):
-        """ Конструктор класса Object """
+        """ Конструктор класса Collidable """
         self.screen = screen
         self.live = 1
         self.x = rnd.randint(0, WIDTH - 100)
@@ -89,7 +77,7 @@ class Object:
         return False
 
 
-class Ball(Object):
+class Ball(Collidable):
     def __init__(self, screen, x, y, r, power):
         """
         Конструктор класса Ball
@@ -147,7 +135,7 @@ class Ball(Object):
         pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.r)
 
 
-class Gun(Object):
+class Gun(Collidable):
     def __init__(self, screen, x, y, direction_keys, full_stop, change_keys, size_keys, fire, number):
         """
         Конструктор класса Gun
@@ -282,7 +270,7 @@ class Gun(Object):
             self.color = GREY
 
 
-class Target(Object):
+class Target(Collidable):
     def __init__(self, screen):
         """
         Конструктор класса Target
@@ -477,3 +465,228 @@ class Bomb(Target):
                 tts.append(t_new)
         return tts
 
+    def move(self):
+        """ Вместо перемещения бомба разростается. """
+        self.r += 1
+
+    def draw(self):
+        """ Рисует квадрат-бомбу. """
+        dr.rect(self.screen, self.color, (self.x - self.r, self.y - self.r, 2 * self.r, 2 * self.r))
+
+
+def make_field_of_play():
+    our_screen.fill(GREEN)
+    dr.rect(our_screen, WHITE, (150, 75, WIDTH - 300, HEIGHT - 150))
+    dr.rect(our_screen, BLUE, (10, HEIGHT - 10, WIDTH - 20, 10))
+    dr.rect(our_screen, YELLOW, (10, 0, WIDTH - 20, 10))
+    dr.rect(our_screen, MAGENTA, (WIDTH - 10, 10, 10, HEIGHT - 20))
+    dr.rect(our_screen, CYAN, (0, 10, 10, HEIGHT - 20))
+
+
+def game_event(guns_):
+    """
+    функция описывает поведение пушек при нажатии клавиш с клавиатуры
+    :param guns_: две пушки
+    :return: finished - окончание игры
+    """
+    finished_2 = False
+    for our_event in pygame.event.get():
+        for gun_ in guns_:
+            if our_event.type == pygame.QUIT:
+                finished_2 = True
+            elif our_event.type == pygame.MOUSEBUTTONDOWN and gun_.fire_method == "MOUSE":
+                gun_.fire2_start()
+            elif our_event.type == pygame.MOUSEBUTTONUP and gun_.fire_method == "MOUSE":
+                bullet[gun_.number - 1] += 1
+                balls.append(gun_.fire2_end(our_event))
+            elif our_event.type == pygame.MOUSEMOTION and gun_.fire_method == "MOUSE":
+                gun_.targeting(our_event)
+            elif our_event.type == pygame.KEYDOWN and gun_.fire_method == "SPACE":
+                if our_event.key == 32:
+                    gun_.fire2_start()
+                elif our_event.key == Q or our_event.key == E:
+                    gun_.targeting(our_event)
+            elif our_event.type == pygame.KEYUP and gun_.fire_method == "SPACE":
+                if our_event.key == 32:
+                    bullet[gun_.number - 1] += 1
+                    balls.append(gun_.fire2_end(our_event))
+                elif our_event.key == Q or our_event.key == E:
+                    gun_.targeting(our_event)
+            if our_event.type == pygame.KEYDOWN:
+                if our_event.key == gun_.right:
+                    if gun_.vx != gun_.v:
+                        gun_.vx = gun_.v
+                    else:
+                        gun_.vy = 0
+                if our_event.key == gun_.left:
+                    if gun_.vx != -gun_.v:
+                        gun_.vx = -gun_.v
+                    else:
+                        gun_.vy = 0
+                if our_event.key == gun_.down:
+                    if gun_.vy != gun_.v:
+                        gun_.vy = gun_.v
+                    else:
+                        gun_.vx = 0
+                if our_event.key == gun_.up:
+                    if gun_.vy != -gun_.v:
+                        gun_.vy = -gun_.v
+                    else:
+                        gun_.vx = 0
+                if our_event.key == gun_.stop:
+                    gun_.vx = 0
+                    gun_.vy = 0
+                if our_event.key == gun_.smaller:
+                    if gun_.r > 7.5:
+                        gun_.r -= 7.5
+                        gun_.start_length = 2 * gun_.r
+                if our_event.key == gun_.bigger:
+                    if gun_.r < 37.5:
+                        gun_.r += 7.5
+                        gun_.start_length = 2 * gun_.r
+                if our_event.key == gun_.black:
+                    gun_.power = BLACK
+                elif our_event.key == gun_.blue:
+                    gun_.power = BLUE
+                elif our_event.key == gun_.yellow:
+                    gun_.power = YELLOW
+                elif our_event.key == gun_.magenta:
+                    gun_.power = MAGENTA
+                elif our_event.key == gun_.cyan:
+                    gun_.power = CYAN
+    return finished_2
+
+
+def strike_event(guns_, targets_, balls_):
+    """
+    функция описывает поведение мишений и шаров при различных событиях в игре
+    :param guns_: пушки
+    :param targets_: мешени
+    :param balls_: шары из пушек
+    """
+    for gun_ in guns_:
+        gun_.move_x()
+        gun_.move_y()
+        gun_.power_up()
+        gun_.invincibility = max(0, gun_.invincibility - 1)
+        for target in targets_:
+            if target.live == 0:
+                if len(targets) <= number_of_targets:
+                    new_target = rnd.choice([Target(our_screen)] * 9 + [Wave(our_screen)] * 2 + [Bomb(our_screen)])
+                    targets[targets.index(target)] = new_target
+                else:
+                    targets.pop(targets.index(target))
+            if target.hit_test(gun_) and target.live:
+                target.live = 0
+                if target.type == 3:
+                    our_points[gun_.number - 1] -= 5
+                    for element in target.blow_up():
+                        targets.append(element)
+                    our_screen.fill(RED)
+                    gun_.invincibility = 0
+                if gun_.invincibility == 0:
+                    our_points[gun_.number - 1] -= 5
+                    our_screen.fill(RED)
+                    if target.type != 3:
+                        gun_.invincibility = 30
+                pygame.display.update()
+                clock.tick(FPS)
+        for ball in balls_:
+            ball.move()
+            ball.live -= 1
+            if ball.live <= 0:
+                balls.pop(balls.index(ball))
+            if gun_.hit_test(ball):
+                ball.live = 0
+                if gun_.invincibility > 0:
+                    pass
+                elif gun_.number != ball.number:
+                    our_screen.fill(RED)
+                    pygame.display.update()
+                    clock.tick(FPS)
+                    our_points[gun_.number - 1] -= 20
+                    our_points[ball.number - 1] += 20
+                    gun_.invincibility = 30
+                else:
+                    our_screen.fill(RED)
+                    pygame.display.update()
+                    clock.tick(FPS)
+                    our_points[gun_.number - 1] -= 10
+                    gun_.invincibility = 30
+
+
+def targets_life(balls_, targets_, bullet_):
+    """
+    функция описывает происходящее при попадании по мешени
+    :param balls_: шары из пушек
+    :param targets_: мишени
+    :param bullet_: выстрелы из пушек
+    """
+    for ball in balls_:
+        for target in targets_:
+            if target.hit_test(ball) and target.live:
+                if target.color == ball.color and target.type != 3:
+                    our_points[ball.number - 1] += 10
+                    target.live = 0
+                    bullet_ = target.hit(ball.number)
+                elif target.type == 1:
+                    target.type = 2
+                    target.vy = target.v
+                    target.vx = 2 * target.v
+                    ball.live = 0
+                elif target.type == 2:
+                    target.type = 1
+                    target.vx = target.v
+                    target.vy = 2 * target.v
+                    ball.live = 0
+                elif target.type == 3:
+                    target.live = 0
+                    ball.live = 0
+                    if target.color == ball.color:
+                        our_points[ball.number - 1] += 20
+                        for element in target.open_up():
+                            targets.append(element)
+                    else:
+                        our_points[ball.number - 1] -= 5
+                        for element in target.blow_up():
+                            targets.append(element)
+                else:
+                    our_points[ball.number - 1] -= 1
+                    target.live = 0
+
+    return bullet_
+
+
+pygame.init()
+our_screen = pygame.display.set_mode((WIDTH, HEIGHT))
+bullet = [0, 0]
+our_points = [0, 0]
+number_of_targets = 15
+balls = []
+targets = []
+
+clock = pygame.time.Clock()
+gun1 = Gun(our_screen, 30, 720, WASD, LEFT_SHIFT, ONE_TO_FIVE, ZX, "SPACE", 1)
+gun2 = Gun(our_screen, 1470, 30, ARROWS, RIGHT_SHIFT, SIX_TO_ZERO, SQUARE_BRACKETS, "MOUSE", 2)
+guns = [gun1, gun2]
+for _ in range(number_of_targets):
+    targets.append(Target(our_screen))
+finished = False
+
+while not finished:
+    make_field_of_play()
+    gun1.draw()
+    gun2.draw()
+    for t in targets:
+        t.draw()
+        t.move()
+    for b in balls:
+        b.draw()
+    score(our_screen, our_points)
+    pygame.display.update()
+    clock.tick(FPS)
+
+    finished = game_event(guns)
+    strike_event(guns, targets, balls)
+    targets_life(balls, targets, bullet)
+pygame.quit()
