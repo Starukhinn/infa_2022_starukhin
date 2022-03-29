@@ -477,14 +477,3 @@ class Bomb(Target):
                 tts.append(t_new)
         return tts
 
-    def move(self):
-        """ Вместо перемещения бомба разростается. """
-        self.r += 1
-
-    def draw(self):
-        """ Рисует квадрат-бомбу. """
-        dr.rect(self.screen, self.color, (self.x - self.r, self.y - self.r, 2 * self.r, 2 * self.r))
-
-
-
-
