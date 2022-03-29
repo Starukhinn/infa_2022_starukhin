@@ -217,7 +217,7 @@ def horse_reflected(x0, y0, size):
 pygame.init()
 
 # choose proposal coefficient for normal view
-picture_size = 0.4
+picture_size = 0.8
 
 screen = pygame.display.set_mode((int(794 * picture_size), int(1123 * picture_size)))
 dr.rect(screen, (0, 255, 0), (0, 0, int(794 * picture_size), int(1123 * picture_size)))

@@ -63,7 +63,7 @@ def strike_wall(current_ball):
 
     if current_ball[0] < 0 or current_ball[0] > 1200:
         current_ball[5] *= -1
-    if current_ball[1] < 0 or current_ball[1] > 900:
+    if current_ball[1] < 0 or current_ball[1] > 800:
         current_ball[6] *= -1
 
 
