@@ -50,8 +50,11 @@ def score(screen, points):
 
 
 class Collidable:
+    """
+    Конструктор класса Collidable
+    """
+
     def __init__(self, screen: pygame.Surface):
-        """ Конструктор класса Collidable """
         self.screen = screen
         self.live = 1
         self.x = rnd.randint(0, WIDTH - 100)
@@ -67,10 +70,9 @@ class Collidable:
     def hit_test(self, obj):
         """
         Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
-        Args:
-            obj: Обьект, с которым проверяется столкновение.
-        Returns:
-            Возвращает True в случае столкновения объектов. В противном случае возвращает False.
+        :param obj: Обьект, с которым проверяется столкновение.
+        :return: Возвращает True в случае столкновения объектов. В противном случае возвращает False.
+
         """
         if self.r + obj.r >= ((self.x - obj.x) ** 2 + (self.y - obj.y) ** 2) ** (1 / 2):
             return True
@@ -79,13 +81,14 @@ class Collidable:
 
 class Ball(Collidable):
     def __init__(self, screen, x, y, r, power):
+
         """
         Конструктор класса Ball
-        Args:
-        x - начальное положение мяча по горизонтали
-        y - начальное положение мяча по вертикали
-        r - радиус мяча
-        power - цвет мяча, отвечающий за то, какие цели тот может уничтожить
+        :param screen: наш экран
+        :param x: начальное положение мяча по горизонтали
+        :param y: начальное положение мяча по вертикали
+        :param r: радиус мяча
+        :param power: цвет мяча, отвечающий за то, какие цели тот может уничтожить
         """
         super().__init__(screen)
         self.number = 0
@@ -131,7 +134,9 @@ class Ball(Collidable):
                 self.vx -= 0.5
 
     def draw(self):
-        """ Рисует мяч. """
+        """
+        Рисует мяч.
+        """
         pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.r)
 
 
@@ -139,15 +144,16 @@ class Gun(Collidable):
     def __init__(self, screen, x, y, direction_keys, full_stop, change_keys, size_keys, fire, number):
         """
         Конструктор класса Gun
-        Args:
-        x - Расположение пушки по оси x
-        y - Расположение пушки по оси y
-        direction_keys - Список кнопок, отвечающих за смену направления движения (в порядке вправо, влево, вниз, вверх)
-        full_stop - Кнопка для полной остановки пушки на месте
-        change_keys - 5 кнопок для переключения между режимами стрельбы
-        size_keys - 2е кнопки для изменения размера пушки (меньше, больше)
-        fire - способ стрельбы и прицеливания (мышью или с помощью пробела, Q и E)
-        number - номер игрока/команды данной пушки
+        :param screen:
+        :param x: Расположение пушки по оси x
+        :param y: Расположение пушки по оси y
+        :param direction_keys: Список кнопок, отвечающих за смену направления движения (в порядке вправо, влево, вниз,
+        вверх)
+        :param full_stop: Кнопка для полной остановки пушки на месте
+        :param change_keys: 5 кнопок для переключения между режимами стрельбы
+        :param size_keys: 2е кнопки для изменения размера пушки (меньше, больше)
+        :param fire: способ стрельбы и прицеливания (мышью или с помощью пробела, Q и E)
+        :param number: номер игрока/команды данной пушки
         """
         super().__init__(screen)
         self.number = number
@@ -204,7 +210,9 @@ class Gun(Collidable):
         return new_ball
 
     def targeting(self, event):
-        """ Прицеливание. Положение дула зависит от положения мыши или начинает вращаться при нажатии Q или E. """
+        """
+        Прицеливание. Положение дула зависит от положения мыши или начинает вращаться при нажатии Q или E.
+        """
         if self.f2_on:
             self.color = RED
         else:
@@ -218,7 +226,9 @@ class Gun(Collidable):
             self.rotate -= (107 - event.key) / 48
 
     def move_x(self):
-        """ Перемещение пушки вдоль оси x вплоть до столкновения со стеной. """
+        """
+        Перемещение пушки вдоль оси x вплоть до столкновения со стеной.
+        """
         if self.x + self.r + self.vx > WIDTH:
             self.x = WIDTH - self.r
             self.vx = 0
@@ -229,7 +239,9 @@ class Gun(Collidable):
             self.x += self.vx
 
     def move_y(self):
-        """ Перемещение пушки вдоль оси y вплоть до столкновения со стеной. """
+        """
+        Перемещение пушки вдоль оси y вплоть до столкновения со стеной.
+        """
         if self.y + self.r + self.vy > HEIGHT:
             self.y = HEIGHT - self.r
             self.vy = 0
@@ -240,7 +252,9 @@ class Gun(Collidable):
             self.y += self.vy
 
     def draw(self):
-        """ Рисует пушку. """
+        """
+        Рисует пушку.
+        """
         self.r = 2 * self.r / 3
         dr.polygon(self.screen, self.color,
                    [(self.x + self.r * math.cos(self.an + math.pi / 2),
@@ -260,7 +274,9 @@ class Gun(Collidable):
         dr.circle(self.screen, self.power, (self.x, self.y), 2 * self.r / 3)
 
     def power_up(self):
-        """ Отвечает за зарядку силы выстрела и вращение дула при нажатии соответствующих кнопок. """
+        """
+        Отвечает за зарядку силы выстрела и вращение дула при нажатии соответствующих кнопок.
+        """
         self.an += self.rotate
         if self.f2_on:
             if self.f2_power < 3 * self.start_length - 2 * self.r:
@@ -311,7 +327,9 @@ class Target(Collidable):
         return [0, 0]
 
     def move(self):
-        """ Перемещение целей в соответствии с приписанными им законами движения и рамками движения. """
+        """
+        Перемещение целей в соответствии с приписанными им законами движения и рамками движения.
+        """
         self.x += self.vx
         self.y += self.vy
         if self.x + self.r > WIDTH - 150:
@@ -328,13 +346,17 @@ class Target(Collidable):
             self.vy *= -1
 
     def draw(self):
-        """ Рисует кружок-цель/волну. """
+        """
+        Рисует кружок-цель/волну.
+        """
         dr.circle(self.screen, self.color, (self.x, self.y), self.r)
 
 
 class Wave(Target):
     def __init__(self, screen):
-        """ Конструктор класса Wave """
+        """
+        Конструктор класса Wave
+        """
         super().__init__(screen)
         self.r = 50
         self.x = rnd.randint(self.r + 150, WIDTH - self.r - 150)
@@ -346,7 +368,9 @@ class Wave(Target):
         self.type = rnd.choice([1, 2])
 
     def move(self):
-        """ Перемещение целей в соответствии с приписанными им законами движения и рамками движения. """
+        """
+        Перемещение целей в соответствии с приписанными им законами движения и рамками движения.
+        """
         if self.type == 1:
             self.y += self.vy * math.sin(self.x / 4)
             self.x += self.vx
@@ -373,17 +397,17 @@ class Wave(Target):
 
 class Bomb(Target):
     def __init__(self, screen):
-        """ Конструктор класса Bomb """
+        """
+        Конструктор класса Bomb
+        """
         super().__init__(screen)
         self.type = 3
 
     def hit_test(self, obj):
         """
         Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
-        Args:
-            obj: Обьект, с которым проверяется столкновение.
-        Returns:
-            Возвращает True в случае столкновения объектов. В противном случае возвращает False.
+        :param obj: Обьект, с которым проверяется столкновение.
+        :return: Возвращает True в случае столкновения объектов. В противном случае возвращает False.
         """
         if obj.x > self.x + self.r and obj.y > self.y + self.r:
             if ((self.x + self.r - obj.x) ** 2 + (self.y + self.r - obj.y) ** 2) ** (1 / 2) <= obj.r:
@@ -466,11 +490,15 @@ class Bomb(Target):
         return tts
 
     def move(self):
-        """ Вместо перемещения бомба разростается. """
+        """
+        Вместо перемещения бомба разростается.
+        """
         self.r += 1
 
     def draw(self):
-        """ Рисует квадрат-бомбу. """
+        """
+        Рисует квадрат-бомбу.
+        """
         dr.rect(self.screen, self.color, (self.x - self.r, self.y - self.r, 2 * self.r, 2 * self.r))
 
 
