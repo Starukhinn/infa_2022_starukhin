@@ -8,7 +8,7 @@ FPS = 30
 RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
-GREEN = (0, 255, 0)
+BROWN = (112, 92, 0)
 MAGENTA = (255, 0, 255)
 CYAN = (0, 255, 255)
 WHITE = (255, 255, 255)
@@ -310,7 +310,7 @@ class Target(Collidable):
         Возвращает обнулённый счётчик выстрелов для обоих игроков/команд.
         """
         self.screen.fill(WHITE)
-        guns[number - 1].color = GREEN
+        guns[number - 1].color = BROWN
         guns[number - 1].draw()
         font = pygame.font.Font(None, 100)
         message = font.render("Вы уничтожили цель за " + str(bullet[number - 1]) + " выстрелов", True,
@@ -503,7 +503,7 @@ class Bomb(Target):
 
 
 def make_field_of_play():
-    our_screen.fill(GREEN)
+    our_screen.fill(BROWN)
     dr.rect(our_screen, WHITE, (150, 75, WIDTH - 300, HEIGHT - 150))
     dr.rect(our_screen, BLUE, (10, HEIGHT - 10, WIDTH - 20, 10))
     dr.rect(our_screen, YELLOW, (10, 0, WIDTH - 20, 10))
